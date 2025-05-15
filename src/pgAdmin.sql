@@ -97,4 +97,5 @@ SELECT *
 FROM products
          LEFT JOIN televisions ON televisions.product_id = products.id
          LEFT JOIN wallbrackets ON wallbrackets.product_id = products.id
-         LEFT JOIN remotecontrollers ON remotecontrollers.product_id = products.id;
+         LEFT JOIN remotecontrollers ON remotecontrollers.product_id = products.id
+ORDER BY products.id;
