@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS cimodules;
 DROP TABLE IF EXISTS televisions;
+DROP TABLE IF EXISTS cimodules;
 DROP TABLE IF EXISTS remotecontrollers;
 DROP TABLE IF EXISTS wallbrackets;
 DROP TABLE IF EXISTS products;
@@ -23,6 +23,13 @@ CREATE TABLE remotecontrollers
     batteryType VARCHAR (255)
 );
 
+CREATE TABLE cimodules
+(
+    product_id INT PRIMARY KEY REFERENCES products(id),
+    provider VARCHAR (255),
+    encoding VARCHAR (255)
+);
+
 CREATE TABLE televisions
 (
     product_id INT PRIMARY KEY REFERENCES products(id),
@@ -35,16 +42,9 @@ CREATE TABLE televisions
     voiceControl BOOLEAN,
     HDR BOOLEAN,
     remotecontroller_id INT UNIQUE,
-    FOREIGN KEY (remotecontroller_id) REFERENCES remotecontrollers(product_id)
-);
-
-CREATE TABLE cimodules
-(
-    product_id INT PRIMARY KEY REFERENCES products(id),
-    provider VARCHAR (255),
-    encoding VARCHAR (255),
-    television_id INT,
-    FOREIGN KEY (television_id) REFERENCES televisions(product_id)
+    cimodule_id INT,
+    FOREIGN KEY (remotecontroller_id) REFERENCES remotecontrollers(product_id),
+    FOREIGN KEY (cimodule_id) REFERENCES cimodules(product_id)
 );
 
 CREATE TABLE wallbrackets
@@ -93,19 +93,20 @@ VALUES
     (5, false, 'AA'),
     (6, true, 'AAA');
 
-INSERT INTO cimodules (product_id, provider, encoding, television_id)
+INSERT INTO cimodules (product_id, provider, encoding)
 VALUES
-    (7, null, null, 1),
-    (8, null, null, 1),
-    (9, 'tele2', 'encode678', 2);
+    (7, null, null),
+    (8, null, null),
+    (9, 'tele2', 'encode678');
 
 UPDATE televisions
-SET remotecontroller_id = 5
-WHERE product_id = 1;
-
-UPDATE televisions
-SET remotecontroller_id = 6
-WHERE product_id = 2;
+SET
+    remotecontroller_id = CASE product_Id
+                              WHEN 1 THEN 5
+                              WHEN 2 THEN 6
+        END,
+    cimodule_id = 7
+WHERE product_id IN (1,2);
 
 SELECT *
 FROM products
