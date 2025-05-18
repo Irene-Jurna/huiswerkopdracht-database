@@ -8,10 +8,10 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE products
 (
     id SERIAL PRIMARY KEY,
-    name VARCHAR (255),
+    name VARCHAR (255) NOT NULL,
     brand VARCHAR (255),
-    price DECIMAL,
-    currentStock INT,
+    price DECIMAL CONSTRAINT price_positive CHECK (price >=0),
+    currentStock INT DEFAULT 0,
     dateSold DATE,
     type VARCHAR (255)
 );
@@ -76,6 +76,11 @@ VALUES
     ('CIM', 'Brandname', 29.50, 3, 'cimodule'),
     ('PIM C', 'No inspiration', 35.36, 7, 'cimodule'),
     ('Extra CI Plus Pro', 'CPP', 27.99, 3, 'cimodule')
+    RETURNING id;
+
+INSERT INTO products (name, type)
+VALUES
+    ('Stockie', 'wallbracket')
     RETURNING id;
 
 INSERT INTO televisions (product_id, height, width, schermKwaliteit, schermType, wifi, smartTv, voiceControl, HDR)
