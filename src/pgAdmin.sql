@@ -68,7 +68,7 @@ CREATE TABLE users
 
 CREATE TABLE televisions_wallbrackets
 (
-    televisionWallbracketId SERIAL PRIMARY KEY,
+    televisionWallbracket_id SERIAL PRIMARY KEY,
     television_id INT,
     wallbracket_id INT,
     FOREIGN KEY (television_id) REFERENCES televisions (product_id),
@@ -115,15 +115,6 @@ VALUES
     (1, 4),
     (2, 3);
 
-UPDATE televisions
-SET
-    remotecontroller_id = CASE product_id
-                              WHEN 1 THEN 5
-                              WHEN 2 THEN 6
-        END,
-    cimodule_id = 7
-WHERE product_id IN (1,2);
-
 INSERT INTO users (username)
 VALUES
     ('Ik'),
@@ -137,6 +128,104 @@ UPDATE users -- voor de update zou er nog een back-up uitgevoerd kunnen worden
 SET phonenumber = '+3112345678'
 WHERE username = 'Ik';
 
+UPDATE televisions
+SET
+    remotecontroller_id = CASE product_id
+                              WHEN 1 THEN 5
+                              WHEN 2 THEN 6
+        END,
+    cimodule_id = 7
+WHERE product_id IN (1,2);
+
+UPDATE products
+SET
+    datesold = '18-05-2025',
+    currentstock = 9
+WHERE id = 1;
+
+-- SELECT #1
+SELECT *
+FROM products
+ORDER BY id;
+
+-- SELECT #2
+SELECT *
+FROM products
+WHERE type = 'television';
+
+-- SELECT #3
+SELECT
+    p.id,
+    p.name,
+    t.height,
+    t.width,
+    t.smartTV,
+    t.schermKwaliteit,
+    t.schermType,
+    t.wifi,
+    t.smartTv,
+    t.voiceControl,
+    t.HDR,
+    t.remotecontroller_id,
+    t.cimodule_id
+FROM products p
+         JOIN televisions t ON p.id = t.product_id;
+
+-- SELECT #4
+SELECT
+    t.name AS name_television,
+    w.name AS name_wallbracket,
+    tw.television_id,
+    tw.wallbracket_id,
+    tw.televisionWallbracket_id
+FROM televisions_wallbrackets tw
+         JOIN products t ON tw.television_id = t.id
+         JOIN products w ON tw.wallbracket_id = w.id;
+
+-- SELECT #5
+SELECT
+    w.name AS wallbracket,
+    'Wallbracket ' || w.name || ' kan gekoppeld worden aan de volgende televisies: ' ||
+    string_agg(t.name, ', ' ORDER BY t.name) AS koppelingen
+FROM televisions_wallbrackets tw
+         JOIN products t ON tw.television_id = t.id
+         JOIN products w ON tw.wallbracket_id = w.id
+GROUP BY w.name;
+
+-- SELECT #6
+SELECT SUM(currentStock) AS total_cimodules_in_stock
+FROM products
+WHERE type = 'cimodule';
+
+-- SELECT #7
+SELECT
+    p.name,
+    t.smartTv,
+    t.voiceControl
+FROM televisions t
+         JOIN products p ON t.product_id = p.id
+WHERE t.smartTV = true AND t.voiceControl = true;
+
+-- SELECT #8
+SELECT
+    u.username,
+    u.phonenumber
+FROM users u
+WHERE phonenumber IS NOT NULL;
+
+-- SELECT #9
+SELECT
+    p.name AS television,
+    rc.name AS gekoppelde_remotecontroller,
+    ci.name AS gekoppelde_cimodule
+FROM televisions t
+         JOIN products p on t.product_id = p.id
+         LEFT JOIN remotecontrollers r ON r.product_id = t.remotecontroller_id
+         LEFT JOIN products rc ON rc.id = r.product_id
+         LEFT JOIN cimodules c ON c.product_id = t.cimodule_id
+         LEFT JOIN products ci ON ci.id = c.product_id;
+
+-- SELECT #10
 SELECT *
 FROM products
          LEFT JOIN televisions ON televisions.product_id = products.id
