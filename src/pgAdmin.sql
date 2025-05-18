@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS remotecontrollers;
-DROP TABLE IF EXISTS televisions;
 DROP TABLE IF EXISTS cimodules;
+DROP TABLE IF EXISTS televisions;
+DROP TABLE IF EXISTS remotecontrollers;
 DROP TABLE IF EXISTS wallbrackets;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS users;
@@ -33,14 +33,18 @@ CREATE TABLE televisions
     wifi BOOLEAN,
     smartTv BOOLEAN,
     voiceControl BOOLEAN,
-    HDR BOOLEAN
+    HDR BOOLEAN,
+    remotecontroller_id INT UNIQUE,
+    FOREIGN KEY (remotecontroller_id) REFERENCES remotecontrollers(product_id)
 );
 
 CREATE TABLE cimodules
 (
     product_id INT PRIMARY KEY REFERENCES products(id),
     provider VARCHAR (255),
-    encoding VARCHAR (255)
+    encoding VARCHAR (255),
+    television_id INT,
+    FOREIGN KEY (television_id) REFERENCES televisions(product_id)
 );
 
 CREATE TABLE wallbrackets
@@ -70,7 +74,8 @@ VALUES
     ('XSD', 'Nokia', 29.00, 8, 'remotecontroller'),
     ('Remote C', 'Apple', 45.31, 2, 'remotecontroller'),
     ('CIM', 'Brandname', 29.50, 3, 'cimodule'),
-    ('PIM C', 'No inspiration', 35.36, 7, 'cimodule')
+    ('PIM C', 'No inspiration', 35.36, 7, 'cimodule'),
+    ('Extra CI Plus Pro', 'CPP', 27.99, 3, 'cimodule')
     RETURNING id;
 
 INSERT INTO televisions (product_id, height, width, schermKwaliteit, schermType, wifi, smartTv, voiceControl, HDR)
@@ -88,14 +93,24 @@ VALUES
     (5, false, 'AA'),
     (6, true, 'AAA');
 
-INSERT INTO cimodules (product_id, provider, encoding)
+INSERT INTO cimodules (product_id, provider, encoding, television_id)
 VALUES
-    (7, null, null),
-    (8, null, null);
+    (7, null, null, 1),
+    (8, null, null, 1),
+    (9, 'tele2', 'encode678', 2);
+
+UPDATE televisions
+SET remotecontroller_id = 5
+WHERE product_id = 1;
+
+UPDATE televisions
+SET remotecontroller_id = 6
+WHERE product_id = 2;
 
 SELECT *
 FROM products
          LEFT JOIN televisions ON televisions.product_id = products.id
          LEFT JOIN wallbrackets ON wallbrackets.product_id = products.id
+         LEFT JOIN cimodules ON cimodules.product_id = products.id
          LEFT JOIN remotecontrollers ON remotecontrollers.product_id = products.id
 ORDER BY products.id;
